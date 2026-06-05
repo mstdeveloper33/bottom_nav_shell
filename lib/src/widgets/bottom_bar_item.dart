@@ -145,6 +145,10 @@ class BottomBarItem extends StatelessWidget {
           onTap: isEnabled ? () => state.onSelect(index) : null,
           radius: 34,
           containedInkWell: false,
+          splashColor: Colors.transparent,
+          highlightColor: Colors.transparent,
+          hoverColor: Colors.transparent,
+          focusColor: Colors.transparent,
           child: AnimatedScale(
             scale: _isSelected ? 1.0 : 0.96,
             duration: duration,
