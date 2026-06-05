@@ -178,6 +178,8 @@ BottomShell(
     height: 76,
     borderRadius: 34,
     margin: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+    selectedFlex: 2,
+    unselectedFlex: 1,
   ),
 )
 ```

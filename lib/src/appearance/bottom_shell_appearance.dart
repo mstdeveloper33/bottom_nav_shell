@@ -31,12 +31,16 @@ class BottomShellAppearance {
     double height = 72,
     double borderRadius = 32,
     EdgeInsets margin = const EdgeInsets.fromLTRB(20, 0, 20, 12),
+    int selectedFlex = 2,
+    int unselectedFlex = 1,
   }) {
     return BottomShellAppearance(
       renderer: FloatingPillBottomBarRenderer(
         height: height,
         borderRadius: borderRadius,
         margin: margin,
+        selectedFlex: selectedFlex,
+        unselectedFlex: unselectedFlex,
       ),
       labelBehavior: labelBehavior,
       animationStyle: animationStyle,

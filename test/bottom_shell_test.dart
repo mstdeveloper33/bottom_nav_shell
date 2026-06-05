@@ -330,6 +330,24 @@ void main() {
               ),
               builder: (_) => const Text('alerts root'),
             ),
+            BottomBranch(
+              id: 'tasks',
+              destination: const BottomDestination(
+                icon: Icons.checklist_outlined,
+                selectedIcon: Icons.checklist,
+                label: 'Tasks',
+              ),
+              builder: (_) => const Text('tasks root'),
+            ),
+            BottomBranch(
+              id: 'profile',
+              destination: const BottomDestination(
+                icon: Icons.person_outline,
+                selectedIcon: Icons.person,
+                label: 'Profile',
+              ),
+              builder: (_) => const Text('profile root'),
+            ),
           ],
         ),
       ),
@@ -340,6 +358,63 @@ void main() {
     await tester.tap(find.byTooltip('Alerts'));
     await tester.pumpAndSettle();
     expect(find.text('Alerts'), findsOneWidget);
+  });
+
+  testWidgets('floating pill gives selected label extra width', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BottomShell(
+          appearance: BottomShellAppearance.floatingPill(),
+          branches: [
+            BottomBranch(
+              id: 'home',
+              destination: const BottomDestination(
+                icon: Icons.home_outlined,
+                label: 'Home',
+              ),
+              builder: (_) => const Text('home root'),
+            ),
+            BottomBranch(
+              id: 'tasks',
+              destination: const BottomDestination(
+                icon: Icons.checklist_outlined,
+                label: 'Tasks',
+              ),
+              builder: (_) => const Text('tasks root'),
+            ),
+            BottomBranch(
+              id: 'alerts',
+              destination: const BottomDestination(
+                icon: Icons.notifications_outlined,
+                label: 'Alerts',
+              ),
+              builder: (_) => const Text('alerts root'),
+            ),
+            BottomBranch(
+              id: 'profile',
+              destination: const BottomDestination(
+                icon: Icons.person_outline,
+                label: 'Profile',
+              ),
+              builder: (_) => const Text('profile root'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.byTooltip('Tasks'));
+    await tester.pumpAndSettle();
+
+    final row = tester.widgetList<Row>(find.byType(Row)).firstWhere((row) {
+      return row.children.whereType<Expanded>().length == 4;
+    });
+    final selected = row.children.whereType<Expanded>().firstWhere(
+      (expanded) => expanded.flex == 2,
+    );
+
+    expect(selected.flex, 2);
+    expect(find.text('Tasks'), findsOneWidget);
   });
 
   testWidgets('adds semantics labels and selected state', (tester) async {

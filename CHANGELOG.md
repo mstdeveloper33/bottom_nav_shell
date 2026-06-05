@@ -10,6 +10,13 @@
   explicit adaptive layout resolution.
 - `BottomShellRouteEvent` and `onBranchRouteEvent` for detailed core branch
   navigator events.
+- `selectedFlex` and `unselectedFlex` options to
+  `BottomShellAppearance.floatingPill` and `FloatingPillBottomBarRenderer`.
+
+### Changed
+
+- Floating Pill renderer now gives the selected destination more horizontal
+  space by default, reducing label truncation on compact mobile widths.
 
 ## 0.1.0
 

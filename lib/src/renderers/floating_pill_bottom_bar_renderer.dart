@@ -10,7 +10,10 @@ class FloatingPillBottomBarRenderer extends BottomBarRenderer {
     this.height = 72,
     this.borderRadius = 32,
     this.margin = const EdgeInsets.fromLTRB(20, 0, 20, 12),
-  });
+    this.selectedFlex = 2,
+    this.unselectedFlex = 1,
+  }) : assert(selectedFlex > 0, 'selectedFlex must be positive.'),
+       assert(unselectedFlex > 0, 'unselectedFlex must be positive.');
 
   /// Pill height.
   final double height;
@@ -20,6 +23,12 @@ class FloatingPillBottomBarRenderer extends BottomBarRenderer {
 
   /// Outer margin around the pill.
   final EdgeInsets margin;
+
+  /// Flex used by the selected destination.
+  final int selectedFlex;
+
+  /// Flex used by unselected destinations.
+  final int unselectedFlex;
 
   @override
   Widget build(BuildContext context, BottomBarState state) {
@@ -58,6 +67,9 @@ class FloatingPillBottomBarRenderer extends BottomBarRenderer {
             children: [
               for (var index = 0; index < state.destinations.length; index++)
                 Expanded(
+                  flex: index == state.selectedIndex
+                      ? selectedFlex
+                      : unselectedFlex,
                   child: _FloatingItemShell(
                     isSelected: index == state.selectedIndex,
                     state: state,
