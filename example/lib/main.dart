@@ -33,6 +33,7 @@ class CoreModeExampleApp extends StatelessWidget {
         ),
         scrollToHidePolicy: const ScrollToHidePolicy.enabled(),
         scrollToTopPolicy: const ScrollToTopPolicy.enabled(),
+        bodyTransition: const BottomShellBodyTransition.fade(),
         keyboardNavigationPolicy: const KeyboardNavigationPolicy.enabled(),
         hapticFeedbackPolicy: const HapticFeedbackPolicy.selectionClick(),
         selectionGuardPolicy: const SelectionGuardPolicy.showPending(),

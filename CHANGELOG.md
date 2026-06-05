@@ -10,6 +10,8 @@
   explicit adaptive layout resolution.
 - `BottomShellRouteEvent` and `onBranchRouteEvent` for detailed core branch
   navigator events.
+- `BottomShellBodyTransition` for branch body fade, slide, scale and custom
+  transition builders.
 - `selectedFlex` and `unselectedFlex` options to
   `BottomShellAppearance.floatingPill` and `FloatingPillBottomBarRenderer`.
 

@@ -1,5 +1,6 @@
 export 'src/appearance/bottom_bar_animation_style.dart';
 export 'src/appearance/bottom_label_behavior.dart';
+export 'src/appearance/bottom_shell_body_transition.dart';
 export 'src/appearance/bottom_shell_appearance.dart';
 export 'src/branch/bottom_branch.dart';
 export 'src/branch/bottom_destination.dart';

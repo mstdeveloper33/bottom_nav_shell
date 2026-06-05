@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../appearance/bottom_bar_animation_style.dart';
+import '../appearance/bottom_shell_body_transition.dart';
 import '../appearance/bottom_shell_appearance.dart';
 import '../branch/bottom_branch.dart';
 import '../branch/bottom_destination.dart';
@@ -142,6 +143,7 @@ class BottomShell extends StatefulWidget {
     this.adaptivePolicy = const AdaptiveNavigationPolicy.disabled(),
     this.scrollToHidePolicy = const ScrollToHidePolicy.disabled(),
     this.scrollToTopPolicy = const ScrollToTopPolicy.enabled(),
+    this.bodyTransition = const BottomShellBodyTransition.none(),
     this.keyboardNavigationPolicy = const KeyboardNavigationPolicy.enabled(),
     this.hapticFeedbackPolicy = const HapticFeedbackPolicy.disabled(),
     this.selectionGuardPolicy = const SelectionGuardPolicy.showPending(),
@@ -194,6 +196,7 @@ class BottomShell extends StatefulWidget {
     this.adaptivePolicy = const AdaptiveNavigationPolicy.disabled(),
     this.scrollToHidePolicy = const ScrollToHidePolicy.disabled(),
     this.scrollToTopPolicy = const ScrollToTopPolicy.enabled(),
+    this.bodyTransition = const BottomShellBodyTransition.none(),
     this.keyboardNavigationPolicy = const KeyboardNavigationPolicy.enabled(),
     this.hapticFeedbackPolicy = const HapticFeedbackPolicy.disabled(),
     this.selectionGuardPolicy = const SelectionGuardPolicy.showPending(),
@@ -244,6 +247,7 @@ class BottomShell extends StatefulWidget {
     this.adaptivePolicy = const AdaptiveNavigationPolicy.disabled(),
     this.scrollToHidePolicy = const ScrollToHidePolicy.disabled(),
     this.scrollToTopPolicy = const ScrollToTopPolicy.enabled(),
+    this.bodyTransition = const BottomShellBodyTransition.none(),
     this.keyboardNavigationPolicy = const KeyboardNavigationPolicy.enabled(),
     this.hapticFeedbackPolicy = const HapticFeedbackPolicy.disabled(),
     this.selectionGuardPolicy = const SelectionGuardPolicy.showPending(),
@@ -308,6 +312,9 @@ class BottomShell extends StatefulWidget {
 
   /// Scroll-to-top policy used when re-tapping the active root branch.
   final ScrollToTopPolicy scrollToTopPolicy;
+
+  /// Body transition used when the selected branch changes.
+  final BottomShellBodyTransition bodyTransition;
 
   /// Keyboard shortcuts for destination navigation.
   final KeyboardNavigationPolicy keyboardNavigationPolicy;
@@ -405,6 +412,8 @@ class _BottomShellState extends State<BottomShell> with RestorationMixin {
   final _loadedIndexes = <int>{};
   final _visitedIndexes = <int>{};
   late int _lastSelectedIndex;
+  late int _previousTransitionIndex;
+  var _transitionSerial = 0;
   var _isNavigationBarVisible = true;
   var _restorationRegistered = false;
   int? _pendingIndex;
@@ -464,6 +473,7 @@ class _BottomShellState extends State<BottomShell> with RestorationMixin {
       canPopBranch: _canPopBranch,
     );
     _lastSelectedIndex = _currentIndex;
+    _previousTransitionIndex = _currentIndex;
 
     if (_isAutoRouteMode) {
       _tabsRouter.addListener(_handleTabsRouterChanged);
@@ -528,6 +538,10 @@ class _BottomShellState extends State<BottomShell> with RestorationMixin {
       if (visibilityController != null) {
         _isNavigationBarVisible = visibilityController.isVisible;
       }
+    }
+
+    if (_isRouterMode && _currentIndex != _lastSelectedIndex) {
+      _notifySelectedIndexChanged(_currentIndex);
     }
 
     if (_usesExternalRouter) {
@@ -675,6 +689,8 @@ class _BottomShellState extends State<BottomShell> with RestorationMixin {
     final destination = _destinations[index];
     final wasVisited = _visitedIndexes.contains(index);
 
+    _previousTransitionIndex = previousIndex;
+    _transitionSerial++;
     _lastSelectedIndex = index;
     _visitedIndexes.add(index);
     if (!_usesExternalRouter && _restorationRegistered) {
@@ -1030,12 +1046,13 @@ class _BottomShellState extends State<BottomShell> with RestorationMixin {
             },
             child: _buildCoreBody(),
           );
+    final transitionedBody = _buildBodyTransition(context, rawBody);
     final body = widget.scrollToHidePolicy.enabled
         ? NotificationListener<ScrollNotification>(
             onNotification: _handleScrollNotification,
-            child: rawBody,
+            child: transitionedBody,
           )
-        : rawBody;
+        : transitionedBody;
 
     final shell = LayoutBuilder(
       builder: (context, constraints) {
@@ -1084,6 +1101,25 @@ class _BottomShellState extends State<BottomShell> with RestorationMixin {
                 )
               : const SizedBox.shrink(),
       ],
+    );
+  }
+
+  Widget _buildBodyTransition(BuildContext context, Widget child) {
+    final transition = widget.bodyTransition;
+    final disableAnimations =
+        MediaQuery.maybeOf(context)?.disableAnimations ?? false;
+    if (!transition.enabled ||
+        transition.duration == Duration.zero ||
+        disableAnimations) {
+      return child;
+    }
+
+    return _BodyTransition(
+      transition: transition,
+      trigger: _transitionSerial,
+      previousIndex: _previousTransitionIndex,
+      currentIndex: _currentIndex,
+      child: child,
     );
   }
 
@@ -1274,6 +1310,114 @@ class _BottomShellState extends State<BottomShell> with RestorationMixin {
         ],
       ),
     );
+  }
+}
+
+class _BodyTransition extends StatefulWidget {
+  const _BodyTransition({
+    required this.transition,
+    required this.trigger,
+    required this.previousIndex,
+    required this.currentIndex,
+    required this.child,
+  });
+
+  final BottomShellBodyTransition transition;
+  final int trigger;
+  final int previousIndex;
+  final int currentIndex;
+  final Widget child;
+
+  @override
+  State<_BodyTransition> createState() => _BodyTransitionState();
+}
+
+class _BodyTransitionState extends State<_BodyTransition>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: widget.transition.duration,
+    );
+    _syncAnimation();
+    _controller.value = 1;
+  }
+
+  @override
+  void didUpdateWidget(_BodyTransition oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.transition != widget.transition) {
+      _controller.duration = widget.transition.duration;
+      _syncAnimation();
+    }
+    if (oldWidget.trigger != widget.trigger) {
+      _controller
+        ..value = 0
+        ..forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _syncAnimation() {
+    _animation = _controller.drive(CurveTween(curve: widget.transition.curve));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final customBuilder = widget.transition.builder;
+    if (customBuilder != null) {
+      return customBuilder(
+        context,
+        _animation,
+        widget.previousIndex,
+        widget.currentIndex,
+        widget.child,
+      );
+    }
+
+    return switch (widget.transition.type) {
+      BottomShellBodyTransitionType.fade => FadeTransition(
+        opacity: _animation,
+        child: widget.child,
+      ),
+      BottomShellBodyTransitionType.slide => FadeTransition(
+        opacity: _animation,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: widget.currentIndex >= widget.previousIndex
+                ? widget.transition.slideOffset
+                : Offset(
+                    -widget.transition.slideOffset.dx,
+                    -widget.transition.slideOffset.dy,
+                  ),
+            end: Offset.zero,
+          ).animate(_animation),
+          child: widget.child,
+        ),
+      ),
+      BottomShellBodyTransitionType.scale => FadeTransition(
+        opacity: _animation,
+        child: ScaleTransition(
+          scale: Tween<double>(
+            begin: widget.transition.scaleFrom,
+            end: 1,
+          ).animate(_animation),
+          child: widget.child,
+        ),
+      ),
+      BottomShellBodyTransitionType.custom ||
+      BottomShellBodyTransitionType.none => widget.child,
+    };
   }
 }
 

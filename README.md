@@ -295,6 +295,48 @@ visibilityController.hide();
 visibilityController.show();
 ```
 
+## Body Transitions
+
+The default body behavior preserves branch state without animating branch
+changes. Add a transition when you want tab changes to feel softer. The same
+API works in core, `go_router` and `auto_route` modes:
+
+```dart
+BottomShell(
+  branches: branches,
+  bodyTransition: const BottomShellBodyTransition.fade(
+    duration: Duration(milliseconds: 180),
+  ),
+)
+```
+
+Built-in presets include `fade`, `slide`, `scale` and `none`:
+
+```dart
+BottomShell(
+  branches: branches,
+  bodyTransition: const BottomShellBodyTransition.slide(
+    slideOffset: Offset(0.04, 0),
+  ),
+)
+```
+
+For full control, provide a custom transition builder:
+
+```dart
+BottomShell(
+  branches: branches,
+  bodyTransition: BottomShellBodyTransition.custom(
+    builder: (context, animation, previousIndex, currentIndex, child) {
+      return FadeTransition(
+        opacity: animation,
+        child: child,
+      );
+    },
+  ),
+)
+```
+
 ## Guards and Disabled Tabs
 
 Disable a destination:
@@ -446,6 +488,7 @@ BottomShell(
   safeAreaPolicy: const SafeAreaPolicy(),
   keyboardPolicy: const KeyboardPolicy.hideNavigationBar(),
   adaptivePolicy: const AdaptiveNavigationPolicy.automatic(),
+  bodyTransition: const BottomShellBodyTransition.none(),
   keyboardNavigationPolicy: const KeyboardNavigationPolicy.enabled(),
   hapticFeedbackPolicy: const HapticFeedbackPolicy.disabled(),
   selectionGuardPolicy: const SelectionGuardPolicy.showPending(),

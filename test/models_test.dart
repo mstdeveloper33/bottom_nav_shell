@@ -96,6 +96,42 @@ void main() {
     });
   });
 
+  group('BottomShellBodyTransition', () {
+    test('stores built-in transition presets', () {
+      const none = BottomShellBodyTransition.none();
+      const fade = BottomShellBodyTransition.fade();
+      const slide = BottomShellBodyTransition.slide(
+        slideOffset: Offset(0.1, 0),
+      );
+      const scale = BottomShellBodyTransition.scale(scaleFrom: 0.95);
+
+      expect(none.enabled, isFalse);
+      expect(fade.type, BottomShellBodyTransitionType.fade);
+      expect(slide.slideOffset, const Offset(0.1, 0));
+      expect(scale.scaleFrom, 0.95);
+    });
+
+    test('supports copyWith and equality', () {
+      const transition = BottomShellBodyTransition.slide(
+        duration: Duration(milliseconds: 240),
+      );
+      final copy = transition.copyWith(
+        type: BottomShellBodyTransitionType.scale,
+        scaleFrom: 0.94,
+      );
+
+      expect(copy.type, BottomShellBodyTransitionType.scale);
+      expect(copy.duration, const Duration(milliseconds: 240));
+      expect(copy.scaleFrom, 0.94);
+      expect(
+        transition,
+        const BottomShellBodyTransition.slide(
+          duration: Duration(milliseconds: 240),
+        ),
+      );
+    });
+  });
+
   group('BottomShellGuardDecision', () {
     test('stores allow, block and redirect decisions', () {
       var redirected = false;

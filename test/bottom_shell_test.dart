@@ -258,6 +258,90 @@ void main() {
     expect(searchInits, 1);
   });
 
+  testWidgets('body transition animates branch changes', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BottomShell(
+          bodyTransition: const BottomShellBodyTransition.fade(
+            duration: Duration(milliseconds: 200),
+          ),
+          branches: [
+            BottomBranch(
+              id: 'home',
+              destination: const BottomDestination(
+                icon: Icons.home_outlined,
+                label: 'Home',
+              ),
+              builder: (_) => const Text('home root'),
+            ),
+            BottomBranch(
+              id: 'search',
+              destination: const BottomDestination(
+                icon: Icons.search_outlined,
+                label: 'Search',
+              ),
+              builder: (_) => const Text('search root'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pump();
+
+    final fade = tester.widgetList<FadeTransition>(find.byType(FadeTransition));
+    expect(fade.any((transition) => transition.opacity.value < 1), isTrue);
+
+    await tester.pumpAndSettle();
+    expect(find.text('search root'), findsOneWidget);
+  });
+
+  testWidgets('custom body transition receives previous and current indexes', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BottomShell(
+          bodyTransition: BottomShellBodyTransition.custom(
+            duration: const Duration(milliseconds: 200),
+            builder: (context, animation, previousIndex, currentIndex, child) {
+              return Stack(
+                children: [
+                  child,
+                  Text('transition $previousIndex->$currentIndex'),
+                ],
+              );
+            },
+          ),
+          branches: [
+            BottomBranch(
+              id: 'home',
+              destination: const BottomDestination(
+                icon: Icons.home_outlined,
+                label: 'Home',
+              ),
+              builder: (_) => const Text('home root'),
+            ),
+            BottomBranch(
+              id: 'search',
+              destination: const BottomDestination(
+                icon: Icons.search_outlined,
+                label: 'Search',
+              ),
+              builder: (_) => const Text('search root'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pump();
+
+    expect(find.text('transition 0->1'), findsOneWidget);
+  });
+
   testWidgets('uses custom barBuilder state', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
