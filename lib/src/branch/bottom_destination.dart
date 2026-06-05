@@ -13,6 +13,7 @@ class BottomDestination {
     this.tooltip,
     this.badge,
     this.selectedColor,
+    this.unselectedColor,
     this.enabled = true,
   });
 
@@ -34,6 +35,10 @@ class BottomDestination {
   /// Optional selected color override for this destination.
   final Color? selectedColor;
 
+  /// Optional unselected color override for this destination.
+  /// When null, the global theme unselected color is used.
+  final Color? unselectedColor;
+
   /// Whether this destination can be selected.
   final bool enabled;
 
@@ -51,6 +56,7 @@ class BottomDestination {
     String? tooltip,
     BranchBadge? badge,
     Color? selectedColor,
+    Color? unselectedColor,
     bool? enabled,
   }) {
     return BottomDestination(
@@ -60,6 +66,7 @@ class BottomDestination {
       tooltip: tooltip ?? this.tooltip,
       badge: badge ?? this.badge,
       selectedColor: selectedColor ?? this.selectedColor,
+      unselectedColor: unselectedColor ?? this.unselectedColor,
       enabled: enabled ?? this.enabled,
     );
   }
@@ -74,6 +81,7 @@ class BottomDestination {
             other.tooltip == tooltip &&
             other.badge == badge &&
             other.selectedColor == selectedColor &&
+            other.unselectedColor == unselectedColor &&
             other.enabled == enabled;
   }
 
@@ -86,6 +94,7 @@ class BottomDestination {
       tooltip,
       badge,
       selectedColor,
+      unselectedColor,
       enabled,
     );
   }

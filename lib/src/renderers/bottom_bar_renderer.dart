@@ -8,6 +8,9 @@ import '../theme/bottom_shell_theme_data.dart';
 /// Callback used by custom bars to select a destination.
 typedef BottomBarSelectCallback = void Function(int index);
 
+/// Callback used for long-press actions on destinations.
+typedef BottomBarLongPressCallback = void Function(int index);
+
 /// Builder used to provide a fully custom bottom bar.
 typedef BottomBarBuilder =
     Widget Function(BuildContext context, BottomBarState state);
@@ -23,6 +26,7 @@ class BottomBarState {
     required this.theme,
     required this.labelBehavior,
     required this.animationStyle,
+    this.onLongPress,
     this.pendingIndex,
     this.disableDestinationsWhilePending = false,
   });
@@ -35,6 +39,9 @@ class BottomBarState {
 
   /// Selects a destination.
   final BottomBarSelectCallback onSelect;
+
+  /// Optional long-press callback on a destination.
+  final BottomBarLongPressCallback? onLongPress;
 
   /// Theme tokens for the renderer.
   final BottomShellThemeData theme;

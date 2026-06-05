@@ -57,6 +57,7 @@ class BottomBarItem extends StatelessWidget {
         state.theme.selectedItemColor ??
         colorScheme.primary;
     final unselectedColor =
+        destination.unselectedColor ??
         state.theme.unselectedItemColor ?? colorScheme.onSurfaceVariant;
     final itemColor = _isSelected ? selectedColor : unselectedColor;
     final effectiveColor = isEnabled
@@ -143,6 +144,9 @@ class BottomBarItem extends StatelessWidget {
         message: destination.effectiveTooltip,
         child: InkResponse(
           onTap: isEnabled ? () => state.onSelect(index) : null,
+          onLongPress: isEnabled && state.onLongPress != null
+              ? () => state.onLongPress!(index)
+              : null,
           radius: 34,
           containedInkWell: false,
           splashColor: Colors.transparent,

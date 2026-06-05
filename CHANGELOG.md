@@ -1,3 +1,15 @@
+## 0.4.0
+
+### Added
+
+- Animated badge transitions — badge bounces when count or dot state changes.
+- Per-destination `unselectedColor` — each tab can carry its own inactive
+  color override (optional, falls back to theme when null).
+- `onDestinationLongPress` callback on `BottomShell` and `onLongPress` in
+  `BottomBarState` — long-press a destination to trigger custom actions
+  (e.g. show a bottom sheet or tooltip).
+- RTL-safe badge positioning via `PositionedDirectional`.
+
 ## 0.3.1
 
 ### Improved

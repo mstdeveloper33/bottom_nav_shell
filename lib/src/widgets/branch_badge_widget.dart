@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../branch/branch_badge.dart';
 import '../theme/bottom_shell_theme_data.dart';
 
-/// Renders a badge over a destination icon.
-class BranchBadgeWidget extends StatelessWidget {
+/// Renders a badge over a destination icon with animated transitions.
+class BranchBadgeWidget extends StatefulWidget {
   /// Creates a badge widget.
   const BranchBadgeWidget({
     required this.badge,
@@ -23,24 +23,65 @@ class BranchBadgeWidget extends StatelessWidget {
   final BottomShellThemeData theme;
 
   @override
+  State<BranchBadgeWidget> createState() => _BranchBadgeWidgetState();
+}
+
+class _BranchBadgeWidgetState extends State<BranchBadgeWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.4), weight: 40),
+      TweenSequenceItem(tween: Tween(begin: 1.4, end: 0.9), weight: 30),
+      TweenSequenceItem(tween: Tween(begin: 0.9, end: 1.0), weight: 30),
+    ]).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+  }
+
+  @override
+  void didUpdateWidget(BranchBadgeWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.badge != widget.badge && widget.badge.animated) {
+      _controller.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final color = badge.color ?? theme.badgeColor ?? Colors.red;
-    final semanticsLabel = badge.isDot
+    final color =
+        widget.badge.color ?? widget.theme.badgeColor ?? Colors.red;
+    final semanticsLabel = widget.badge.isDot
         ? 'New notification'
-        : '${badge.displayText} notifications';
+        : '${widget.badge.displayText} notifications';
 
     return Stack(
       clipBehavior: Clip.none,
       children: [
-        child,
+        widget.child,
         PositionedDirectional(
           top: -6,
           end: -10,
           child: Semantics(
             label: semanticsLabel,
-            child: badge.isDot
-                ? _DotBadge(color: color)
-                : _CountBadge(color: color, text: badge.displayText),
+            child: ScaleTransition(
+              scale: _scaleAnimation,
+              child: widget.badge.isDot
+                  ? _DotBadge(color: color)
+                  : _CountBadge(color: color, text: widget.badge.displayText),
+            ),
           ),
         ),
       ],

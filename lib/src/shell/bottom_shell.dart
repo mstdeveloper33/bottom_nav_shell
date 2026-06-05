@@ -168,6 +168,7 @@ class BottomShell extends StatefulWidget {
     this.onBranchBecameActiveAgain,
     this.onBranchRouteChanged,
     this.onBranchRouteEvent,
+    this.onDestinationLongPress,
     super.key,
   }) : assert(
          branches.length >= 2 && branches.length <= 5,
@@ -221,6 +222,7 @@ class BottomShell extends StatefulWidget {
     this.onBranchBecameActiveAgain,
     this.onBranchRouteChanged,
     this.onBranchRouteEvent,
+    this.onDestinationLongPress,
     super.key,
   }) : assert(
          destinations.length >= 2 && destinations.length <= 5,
@@ -272,6 +274,7 @@ class BottomShell extends StatefulWidget {
     this.onBranchBecameActiveAgain,
     this.onBranchRouteChanged,
     this.onBranchRouteEvent,
+    this.onDestinationLongPress,
     super.key,
   }) : assert(
          destinations.length >= 2 && destinations.length <= 5,
@@ -389,6 +392,9 @@ class BottomShell extends StatefulWidget {
 
   /// Called when a detailed core branch navigator route event occurs.
   final BottomShellRouteEventCallback? onBranchRouteEvent;
+
+  /// Called when a destination is long-pressed.
+  final BottomBarLongPressCallback? onDestinationLongPress;
 
   final _BottomShellMode _mode;
   final List<BottomBranch>? _branches;
@@ -1136,6 +1142,7 @@ class _BottomShellState extends State<BottomShell> with RestorationMixin {
       destinations: _destinations,
       selectedIndex: _currentIndex,
       onSelect: _selectIndex,
+      onLongPress: widget.onDestinationLongPress,
       theme: theme,
       labelBehavior: widget.appearance.labelBehavior,
       animationStyle: disableAnimations
