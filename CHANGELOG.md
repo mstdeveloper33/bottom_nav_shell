@@ -1,3 +1,16 @@
+## 0.2.0
+
+### Added
+
+- `BottomShellGuardDecision` and `onSelectionGuard` for rich guard decisions,
+  block reasons, metadata and redirect callbacks.
+- `BottomShellVisibilityController` for programmatic compact bottom bar
+  visibility control.
+- `AdaptiveNavigationPolicy.layoutForWidth` and `BottomAdaptiveLayout` for
+  explicit adaptive layout resolution.
+- `BottomShellRouteEvent` and `onBranchRouteEvent` for detailed core branch
+  navigator events.
+
 ## 0.1.0
 
 ### Added

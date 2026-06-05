@@ -89,6 +89,31 @@ void main() {
       expect(guard.showPendingIndicator, isTrue);
       expect(guard.disableDestinationsWhilePending, isTrue);
       expect(adaptive.extendedRailBreakpoint, 900);
+      expect(adaptive.layoutForWidth(500), BottomAdaptiveLayout.bottomBar);
+      expect(adaptive.layoutForWidth(700), BottomAdaptiveLayout.rail);
+      expect(adaptive.layoutForWidth(950), BottomAdaptiveLayout.extendedRail);
+      expect(adaptive.layoutForWidth(1300), BottomAdaptiveLayout.drawer);
+    });
+  });
+
+  group('BottomShellGuardDecision', () {
+    test('stores allow, block and redirect decisions', () {
+      var redirected = false;
+      const allow = BottomShellGuardDecision.allow(metadata: 'ok');
+      const block = BottomShellGuardDecision.block(reason: 'auth');
+      final redirect = BottomShellGuardDecision.redirect(
+        redirect: () => redirected = true,
+        reason: 'login',
+      );
+
+      expect(allow.allowed, isTrue);
+      expect(allow.metadata, 'ok');
+      expect(block.allowed, isFalse);
+      expect(block.reason, 'auth');
+
+      redirect.onBlocked?.call();
+      expect(redirect.allowed, isFalse);
+      expect(redirected, isTrue);
     });
   });
 }

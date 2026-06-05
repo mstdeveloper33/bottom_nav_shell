@@ -25,9 +25,11 @@ way to work with routers.
 - Adaptive NavigationRail, extended rail and desktop drawer layouts.
 - Material, Floating Pill and Cupertino renderers.
 - Scroll-to-hide, root scroll-to-top and custom scroll registry behavior.
+- Programmatic bottom bar visibility control.
 - Disabled destinations, async tab guards and pending guard UX.
+- Rich tab guard decisions with redirect callbacks and metadata.
 - Keyboard destination shortcuts and optional haptic feedback.
-- Branch lifecycle and route-change callbacks for analytics.
+- Branch lifecycle and detailed route-event callbacks for analytics.
 - Badges, tooltips, semantics and 48x48 touch targets.
 - Custom bottom bar, rail and drawer builders for full control.
 
@@ -35,7 +37,7 @@ way to work with routers.
 
 ```yaml
 dependencies:
-  bottom_shell_nav: ^0.1.0
+  bottom_shell_nav: ^0.2.0
 ```
 
 ## Core Usage
@@ -237,6 +239,12 @@ BottomShell(
 )
 ```
 
+Resolve adaptive layouts yourself when coordinating desktop UI:
+
+```dart
+final layout = AdaptiveNavigationPolicy.automatic().layoutForWidth(width);
+```
+
 ## Scroll Behavior
 
 Hide the bottom bar while scrolling down and show it again when scrolling up:
@@ -270,6 +278,21 @@ BottomShell(
 scrollRegistry.register(0, homeScrollController);
 ```
 
+Control compact bottom bar visibility from nested scroll coordinators or
+external UI:
+
+```dart
+final visibilityController = BottomShellVisibilityController();
+
+BottomShell(
+  branches: branches,
+  navigationVisibilityController: visibilityController,
+);
+
+visibilityController.hide();
+visibilityController.show();
+```
+
 ## Guards and Disabled Tabs
 
 Disable a destination:
@@ -294,6 +317,24 @@ BottomShell(
       return false;
     }
     return true;
+  },
+)
+```
+
+Use rich guard decisions when you need redirect handling or analytics metadata:
+
+```dart
+BottomShell(
+  branches: branches,
+  onSelectionGuard: (context, index, destination) async {
+    if (destination.label == 'Profile' && !isSignedIn) {
+      return BottomShellGuardDecision.redirect(
+        reason: 'login-required',
+        metadata: {'target': destination.label},
+        redirect: () => showLoginSheet(context),
+      );
+    }
+    return const BottomShellGuardDecision.allow();
   },
 )
 ```
@@ -367,6 +408,7 @@ BottomShell(
   onBranchExited: (index, destination) => logTabExit(destination.label),
   onBranchBecameActiveAgain: (index, destination) => refreshIfNeeded(index),
   onBranchRouteChanged: (index, route) => logRoute(route?.settings.name),
+  onBranchRouteEvent: (event) => logRouteEvent(event.type, event.routeName),
 )
 ```
 
@@ -433,10 +475,9 @@ flutter run -t lib/auto_route_example.dart
 
 ## Roadmap
 
-- Adaptive navigation breakpoints for more desktop form factors.
-- Scroll-to-hide integration with nested scroll coordinators.
-- Tab guards with richer redirect metadata.
 - Glass renderer only after performance and platform testing.
+- Adaptive navigation rail/drawer refinements.
+- Cupertino route-aware renderer improvements.
 
 ## License
 

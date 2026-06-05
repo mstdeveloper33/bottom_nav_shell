@@ -9,6 +9,7 @@ import '../appearance/bottom_bar_animation_style.dart';
 import '../appearance/bottom_shell_appearance.dart';
 import '../branch/bottom_branch.dart';
 import '../branch/bottom_destination.dart';
+import '../guards/bottom_shell_guard_decision.dart';
 import '../policies/adaptive_navigation_policy.dart';
 import '../policies/branch_persistence_policy.dart';
 import '../policies/haptic_feedback_policy.dart';
@@ -21,15 +22,25 @@ import '../policies/scroll_to_top_policy.dart';
 import '../policies/selection_guard_policy.dart';
 import '../widgets/branch_badge_widget.dart';
 import '../renderers/bottom_bar_renderer.dart';
+import '../routes/bottom_shell_route_event.dart';
 import '../scroll/scroll_to_top_registry.dart';
 import '../theme/bottom_shell_theme.dart';
 import '../theme/bottom_shell_theme_data.dart';
+import 'bottom_shell_visibility_controller.dart';
 
 part 'bottom_shell_controller.dart';
 
 /// Called before selecting a destination.
 typedef BottomShellCanSelect =
     FutureOr<bool> Function(
+      BuildContext context,
+      int index,
+      BottomDestination destination,
+    );
+
+/// Called before selecting a destination with a rich decision result.
+typedef BottomShellSelectionGuard =
+    FutureOr<BottomShellGuardDecision> Function(
       BuildContext context,
       int index,
       BottomDestination destination,
@@ -42,6 +53,10 @@ typedef BottomShellDestinationCallback =
 /// Called when a branch navigator route changes in core mode.
 typedef BottomShellRouteChangedCallback =
     void Function(int index, Route<dynamic>? route);
+
+/// Called when a detailed core branch route event occurs.
+typedef BottomShellRouteEventCallback =
+    void Function(BottomShellRouteEvent event);
 
 /// Builds a custom adaptive rail or drawer navigation surface.
 typedef BottomAdaptiveNavigationBuilder =
@@ -131,12 +146,14 @@ class BottomShell extends StatefulWidget {
     this.hapticFeedbackPolicy = const HapticFeedbackPolicy.disabled(),
     this.selectionGuardPolicy = const SelectionGuardPolicy.showPending(),
     this.scrollToTopRegistry,
+    this.navigationVisibilityController,
     this.appearance = const BottomShellAppearance.material(),
     this.theme,
     this.barBuilder,
     this.railBuilder,
     this.drawerBuilder,
     this.restorationScopeId,
+    this.onSelectionGuard,
     this.onBeforeSelect,
     this.onSelectionBlocked,
     this.onIndexChanged,
@@ -148,6 +165,7 @@ class BottomShell extends StatefulWidget {
     this.onBranchExited,
     this.onBranchBecameActiveAgain,
     this.onBranchRouteChanged,
+    this.onBranchRouteEvent,
     super.key,
   }) : assert(
          branches.length >= 2 && branches.length <= 5,
@@ -180,12 +198,14 @@ class BottomShell extends StatefulWidget {
     this.hapticFeedbackPolicy = const HapticFeedbackPolicy.disabled(),
     this.selectionGuardPolicy = const SelectionGuardPolicy.showPending(),
     this.scrollToTopRegistry,
+    this.navigationVisibilityController,
     this.appearance = const BottomShellAppearance.material(),
     this.theme,
     this.barBuilder,
     this.railBuilder,
     this.drawerBuilder,
     this.restorationScopeId,
+    this.onSelectionGuard,
     this.onBeforeSelect,
     this.onSelectionBlocked,
     this.onIndexChanged,
@@ -197,6 +217,7 @@ class BottomShell extends StatefulWidget {
     this.onBranchExited,
     this.onBranchBecameActiveAgain,
     this.onBranchRouteChanged,
+    this.onBranchRouteEvent,
     super.key,
   }) : assert(
          destinations.length >= 2 && destinations.length <= 5,
@@ -227,12 +248,14 @@ class BottomShell extends StatefulWidget {
     this.hapticFeedbackPolicy = const HapticFeedbackPolicy.disabled(),
     this.selectionGuardPolicy = const SelectionGuardPolicy.showPending(),
     this.scrollToTopRegistry,
+    this.navigationVisibilityController,
     this.appearance = const BottomShellAppearance.material(),
     this.theme,
     this.barBuilder,
     this.railBuilder,
     this.drawerBuilder,
     this.restorationScopeId,
+    this.onSelectionGuard,
     this.onBeforeSelect,
     this.onSelectionBlocked,
     this.onIndexChanged,
@@ -244,6 +267,7 @@ class BottomShell extends StatefulWidget {
     this.onBranchExited,
     this.onBranchBecameActiveAgain,
     this.onBranchRouteChanged,
+    this.onBranchRouteEvent,
     super.key,
   }) : assert(
          destinations.length >= 2 && destinations.length <= 5,
@@ -297,6 +321,9 @@ class BottomShell extends StatefulWidget {
   /// Optional branch-specific scroll-to-top registry.
   final ScrollToTopRegistry? scrollToTopRegistry;
 
+  /// Optional controller for compact bottom navigation visibility.
+  final BottomShellVisibilityController? navigationVisibilityController;
+
   /// Visual renderer appearance.
   final BottomShellAppearance appearance;
 
@@ -314,6 +341,11 @@ class BottomShell extends StatefulWidget {
 
   /// Restoration id used to preserve the selected branch.
   final String? restorationScopeId;
+
+  /// Called before selecting a new destination with a rich decision result.
+  ///
+  /// When provided, this takes precedence over [onBeforeSelect].
+  final BottomShellSelectionGuard? onSelectionGuard;
 
   /// Called before selecting a new destination. Return false to block.
   final BottomShellCanSelect? onBeforeSelect;
@@ -347,6 +379,9 @@ class BottomShell extends StatefulWidget {
 
   /// Called when a core branch navigator changes route.
   final BottomShellRouteChangedCallback? onBranchRouteChanged;
+
+  /// Called when a detailed core branch navigator route event occurs.
+  final BottomShellRouteEventCallback? onBranchRouteEvent;
 
   final _BottomShellMode _mode;
   final List<BottomBranch>? _branches;
@@ -445,6 +480,13 @@ class _BottomShellState extends State<BottomShell> with RestorationMixin {
       _controller.addListener(_handleControllerChanged);
       _controller._bind(_controllerDelegate);
     }
+    widget.navigationVisibilityController?.addListener(
+      _handleVisibilityControllerChanged,
+    );
+    final visibilityController = widget.navigationVisibilityController;
+    if (visibilityController != null) {
+      _isNavigationBarVisible = visibilityController.isVisible;
+    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         _notifyInitialBranchEntered();
@@ -472,6 +514,20 @@ class _BottomShellState extends State<BottomShell> with RestorationMixin {
       oldWidget._tabsRouter?.removeListener(_handleTabsRouterChanged);
       _tabsRouter.addListener(_handleTabsRouterChanged);
       _lastSelectedIndex = _currentIndex;
+    }
+
+    if (oldWidget.navigationVisibilityController !=
+        widget.navigationVisibilityController) {
+      oldWidget.navigationVisibilityController?.removeListener(
+        _handleVisibilityControllerChanged,
+      );
+      widget.navigationVisibilityController?.addListener(
+        _handleVisibilityControllerChanged,
+      );
+      final visibilityController = widget.navigationVisibilityController;
+      if (visibilityController != null) {
+        _isNavigationBarVisible = visibilityController.isVisible;
+      }
     }
 
     if (_usesExternalRouter) {
@@ -507,6 +563,9 @@ class _BottomShellState extends State<BottomShell> with RestorationMixin {
     if (_isAutoRouteMode) {
       _tabsRouter.removeListener(_handleTabsRouterChanged);
     }
+    widget.navigationVisibilityController?.removeListener(
+      _handleVisibilityControllerChanged,
+    );
     if (!_usesExternalRouter) {
       _controller.removeListener(_handleControllerChanged);
       _controller._unbind(_controllerDelegate);
@@ -519,6 +578,14 @@ class _BottomShellState extends State<BottomShell> with RestorationMixin {
     }
     _restoredIndex.dispose();
     super.dispose();
+  }
+
+  void _handleVisibilityControllerChanged() {
+    final controller = widget.navigationVisibilityController;
+    if (controller == null || _isNavigationBarVisible == controller.isVisible) {
+      return;
+    }
+    setState(() => _isNavigationBarVisible = controller.isVisible);
   }
 
   void _syncNavigatorKeys() {
@@ -638,25 +705,13 @@ class _BottomShellState extends State<BottomShell> with RestorationMixin {
     final isReTap = index == _currentIndex;
 
     if (!isReTap) {
-      final guard = widget.onBeforeSelect;
-      var canSelect = true;
-      if (guard != null) {
-        _setPendingIndex(index);
-        try {
-          canSelect = await Future<bool>.value(
-            guard(context, index, destination),
-          );
-        } finally {
-          if (mounted) {
-            _setPendingIndex(null);
-          }
-        }
-        if (!mounted) {
-          return;
-        }
+      final decision = await _resolveSelectionGuard(index, destination);
+      if (!mounted) {
+        return;
       }
-      if (!canSelect) {
+      if (!decision.allowed) {
         widget.onSelectionBlocked?.call(index, destination);
+        decision.onBlocked?.call();
         return;
       }
     }
@@ -696,6 +751,36 @@ class _BottomShellState extends State<BottomShell> with RestorationMixin {
     }
     _markBranchLoaded(index);
     _controller.selectIndex(index);
+  }
+
+  Future<BottomShellGuardDecision> _resolveSelectionGuard(
+    int index,
+    BottomDestination destination,
+  ) async {
+    final richGuard = widget.onSelectionGuard;
+    final boolGuard = widget.onBeforeSelect;
+    if (richGuard == null && boolGuard == null) {
+      return const BottomShellGuardDecision.allow();
+    }
+
+    _setPendingIndex(index);
+    try {
+      if (richGuard != null) {
+        return await Future<BottomShellGuardDecision>.value(
+          richGuard(context, index, destination),
+        );
+      }
+      final canSelect = await Future<bool>.value(
+        boolGuard!(context, index, destination),
+      );
+      return canSelect
+          ? const BottomShellGuardDecision.allow()
+          : const BottomShellGuardDecision.block();
+    } finally {
+      if (mounted) {
+        _setPendingIndex(null);
+      }
+    }
   }
 
   void _setPendingIndex(int? index) {
@@ -800,8 +885,9 @@ class _BottomShellState extends State<BottomShell> with RestorationMixin {
     return false;
   }
 
-  void _handleBranchNavigationChanged(int index, Route<dynamic>? route) {
-    widget.onBranchRouteChanged?.call(index, route);
+  void _handleBranchNavigationChanged(BottomShellRouteEvent event) {
+    widget.onBranchRouteChanged?.call(event.branchIndex, event.route);
+    widget.onBranchRouteEvent?.call(event);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         setState(() {});
@@ -833,6 +919,15 @@ class _BottomShellState extends State<BottomShell> with RestorationMixin {
       return;
     }
     setState(() => _isNavigationBarVisible = visible);
+    final controller = widget.navigationVisibilityController;
+    if (controller == null || controller.isVisible == visible) {
+      return;
+    }
+    if (visible) {
+      controller.show();
+    } else {
+      controller.hide();
+    }
   }
 
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
@@ -944,22 +1039,19 @@ class _BottomShellState extends State<BottomShell> with RestorationMixin {
 
     final shell = LayoutBuilder(
       builder: (context, constraints) {
-        final useRail =
-            widget.adaptivePolicy.enabled &&
-            constraints.maxWidth >= widget.adaptivePolicy.railBreakpoint;
-        final useDrawer =
-            widget.adaptivePolicy.enabled &&
-            constraints.maxWidth >= widget.adaptivePolicy.drawerBreakpoint;
-        final useExtendedRail =
-            useRail &&
-            !useDrawer &&
-            constraints.maxWidth >=
-                widget.adaptivePolicy.extendedRailBreakpoint;
-        if (useDrawer) {
+        final layout = widget.adaptivePolicy.layoutForWidth(
+          constraints.maxWidth,
+        );
+        if (layout == BottomAdaptiveLayout.drawer) {
           return _buildDrawerLayout(context, body);
         }
-        if (useRail) {
-          return _buildRailLayout(context, body, extended: useExtendedRail);
+        if (layout == BottomAdaptiveLayout.rail ||
+            layout == BottomAdaptiveLayout.extendedRail) {
+          return _buildRailLayout(
+            context,
+            body,
+            extended: layout == BottomAdaptiveLayout.extendedRail,
+          );
         }
         return Scaffold(
           body: body,
@@ -1357,25 +1449,53 @@ class _BranchNavigatorObserver extends NavigatorObserver {
   _BranchNavigatorObserver({required this.index, required this.onChanged});
 
   final int index;
-  final void Function(int index, Route<dynamic>? route) onChanged;
+  final void Function(BottomShellRouteEvent event) onChanged;
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    onChanged(index, route);
+    onChanged(
+      BottomShellRouteEvent(
+        branchIndex: index,
+        type: BottomShellRouteEventType.push,
+        route: route,
+        previousRoute: previousRoute,
+      ),
+    );
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    onChanged(index, previousRoute);
+    onChanged(
+      BottomShellRouteEvent(
+        branchIndex: index,
+        type: BottomShellRouteEventType.pop,
+        route: previousRoute,
+        previousRoute: route,
+      ),
+    );
   }
 
   @override
   void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    onChanged(index, previousRoute);
+    onChanged(
+      BottomShellRouteEvent(
+        branchIndex: index,
+        type: BottomShellRouteEventType.remove,
+        route: previousRoute,
+        previousRoute: route,
+      ),
+    );
   }
 
   @override
   void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
-    onChanged(index, newRoute);
+    onChanged(
+      BottomShellRouteEvent(
+        branchIndex: index,
+        type: BottomShellRouteEventType.replace,
+        route: newRoute,
+        previousRoute: oldRoute,
+      ),
+    );
   }
 }

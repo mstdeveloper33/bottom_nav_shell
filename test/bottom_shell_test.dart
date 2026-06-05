@@ -732,6 +732,51 @@ void main() {
     expect(find.byTooltip('Search'), findsOneWidget);
   });
 
+  testWidgets('visibility controller hides and shows the bottom bar', (
+    tester,
+  ) async {
+    final visibilityController = BottomShellVisibilityController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BottomShell(
+          navigationVisibilityController: visibilityController,
+          scrollToHidePolicy: const ScrollToHidePolicy.enabled(
+            duration: Duration.zero,
+          ),
+          branches: [
+            BottomBranch(
+              id: 'home',
+              destination: const BottomDestination(
+                icon: Icons.home_outlined,
+                label: 'Home',
+              ),
+              builder: (_) => const Text('home root'),
+            ),
+            BottomBranch(
+              id: 'search',
+              destination: const BottomDestination(
+                icon: Icons.search_outlined,
+                label: 'Search',
+              ),
+              builder: (_) => const Text('search root'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.byTooltip('Search'), findsOneWidget);
+
+    visibilityController.hide();
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Search'), findsNothing);
+
+    visibilityController.show();
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Search'), findsOneWidget);
+  });
+
   testWidgets('keyboard shortcuts switch destinations', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -963,6 +1008,53 @@ void main() {
     expect(find.byType(CircularProgressIndicator), findsNothing);
   });
 
+  testWidgets('rich guard can block and redirect selection', (tester) async {
+    var redirected = false;
+    final blocked = <String>[];
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: BottomShell(
+          onSelectionGuard: (context, index, destination) {
+            return BottomShellGuardDecision.redirect(
+              reason: 'login-required',
+              metadata: {'target': destination.label},
+              redirect: () => redirected = true,
+            );
+          },
+          onSelectionBlocked: (index, destination) {
+            blocked.add(destination.label);
+          },
+          branches: [
+            BottomBranch(
+              id: 'home',
+              destination: const BottomDestination(
+                icon: Icons.home_outlined,
+                label: 'Home',
+              ),
+              builder: (_) => const Text('home root'),
+            ),
+            BottomBranch(
+              id: 'profile',
+              destination: const BottomDestination(
+                icon: Icons.person_outline,
+                label: 'Profile',
+              ),
+              builder: (_) => const Text('profile root'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.tap(find.byTooltip('Profile'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('home root'), findsOneWidget);
+    expect(blocked, ['Profile']);
+    expect(redirected, isTrue);
+  });
+
   testWidgets('lifecycle and analytics hooks are called', (tester) async {
     final events = <String>[];
 
@@ -1034,6 +1126,7 @@ void main() {
 
   testWidgets('reports core branch route changes', (tester) async {
     final routes = <String>[];
+    final events = <BottomShellRouteEvent>[];
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1041,6 +1134,7 @@ void main() {
           onBranchRouteChanged: (index, route) {
             routes.add('$index:${route?.settings.name ?? 'root'}');
           },
+          onBranchRouteEvent: events.add,
           branches: [
             BottomBranch(
               id: 'home',
@@ -1067,6 +1161,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(routes, contains('0:home-detail'));
+    expect(
+      events.map((event) => event.type),
+      contains(BottomShellRouteEventType.push),
+    );
+    expect(events.map((event) => event.routeName), contains('home-detail'));
   });
 
   testWidgets('renders Cupertino renderer', (tester) async {

@@ -1,5 +1,20 @@
 import 'package:flutter/foundation.dart';
 
+/// Resolved adaptive navigation layout.
+enum BottomAdaptiveLayout {
+  /// Compact bottom bar layout.
+  bottomBar,
+
+  /// Collapsed NavigationRail layout.
+  rail,
+
+  /// Extended NavigationRail layout.
+  extendedRail,
+
+  /// Drawer-style side panel layout.
+  drawer,
+}
+
 /// Large-screen navigation behavior for [BottomShell].
 @immutable
 class AdaptiveNavigationPolicy {
@@ -43,6 +58,37 @@ class AdaptiveNavigationPolicy {
 
   /// Drawer-style panel width.
   final double drawerWidth;
+
+  /// Resolves the adaptive layout for [width].
+  BottomAdaptiveLayout layoutForWidth(double width) {
+    if (!enabled || width < railBreakpoint) {
+      return BottomAdaptiveLayout.bottomBar;
+    }
+    if (width >= drawerBreakpoint) {
+      return BottomAdaptiveLayout.drawer;
+    }
+    if (width >= extendedRailBreakpoint) {
+      return BottomAdaptiveLayout.extendedRail;
+    }
+    return BottomAdaptiveLayout.rail;
+  }
+
+  /// Whether [width] resolves to a rail layout.
+  bool usesRail(double width) {
+    final layout = layoutForWidth(width);
+    return layout == BottomAdaptiveLayout.rail ||
+        layout == BottomAdaptiveLayout.extendedRail;
+  }
+
+  /// Whether [width] resolves to an extended rail layout.
+  bool usesExtendedRail(double width) {
+    return layoutForWidth(width) == BottomAdaptiveLayout.extendedRail;
+  }
+
+  /// Whether [width] resolves to a drawer layout.
+  bool usesDrawer(double width) {
+    return layoutForWidth(width) == BottomAdaptiveLayout.drawer;
+  }
 
   @override
   bool operator ==(Object other) {

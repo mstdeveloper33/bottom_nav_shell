@@ -33,4 +33,20 @@ void main() {
       await controller.reselectCurrent();
     });
   });
+
+  group('BottomShellVisibilityController', () {
+    test('notifies when visibility changes', () {
+      final controller = BottomShellVisibilityController();
+      var calls = 0;
+      controller.addListener(() => calls++);
+
+      controller.hide();
+      controller.hide();
+      controller.show();
+      controller.toggle();
+
+      expect(controller.isVisible, isFalse);
+      expect(calls, 3);
+    });
+  });
 }
