@@ -1,3 +1,13 @@
+## 0.3.1
+
+### Improved
+
+- Expanded README with per-renderer parameter documentation and quick-start
+  example.
+- Added rich `example/example.md` for the pub.dev Example tab covering
+  presets, go_router, auto_route, badges, guards, theming, controller,
+  adaptive navigation and custom renderer usage.
+
 ## 0.3.0
 
 ### Added
