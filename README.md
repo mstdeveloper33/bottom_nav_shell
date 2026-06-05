@@ -196,16 +196,152 @@ BottomShell(
 
 Additional presets are available for more opinionated UI styles:
 
+### Curved / Notched
+
+A bar with a smooth concave notch — the selected icon floats in a raised
+circle above the bar surface:
+
 ```dart
-BottomShellAppearance.curved()
-BottomShellAppearance.gNav()
-BottomShellAppearance.dotIndicator()
-BottomShellAppearance.waterDrop()
-BottomShellAppearance.flashy()
-BottomShellAppearance.bubble()
-BottomShellAppearance.convex()
-BottomShellAppearance.sliding()
-BottomShellAppearance.glow()
+BottomShellAppearance.curved(
+  height: 62,
+  curveDepth: 30,    // how deep the notch dips
+  curveWidth: 75,    // horizontal notch opening
+  fabSize: 56,       // floating circle diameter
+  fabOffset: -18,    // negative = higher above bar
+)
+```
+
+### GNav (Google Pill)
+
+Selected item expands into a pill shape with icon + label, Google-style:
+
+```dart
+BottomShellAppearance.gNav(
+  height: 64,
+  gap: 8,               // space between icon and label
+  tabBorderRadius: 100, // pill roundness
+  tabPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+)
+```
+
+### Dot Indicator
+
+Minimal style — a small animated dot appears below the selected icon:
+
+```dart
+BottomShellAppearance.dotIndicator(
+  height: 64,
+  dotSize: 5,
+  dotSpacing: 4,
+)
+```
+
+### Water Drop
+
+The selected icon drops into a colored circle with a top indicator line:
+
+```dart
+BottomShellAppearance.waterDrop(
+  height: 68,
+  dropHeight: 22,
+  dropRadius: 20,
+)
+```
+
+### Flashy
+
+Icon slides up, label fades in from below:
+
+```dart
+BottomShellAppearance.flashy(
+  height: 60,
+  iconShift: -6, // how far icon moves up
+)
+```
+
+### Bubble / Expanding
+
+Selected item expands into a background pill with icon + label:
+
+```dart
+BottomShellAppearance.bubble(
+  height: 64,
+  bubbleBorderRadius: 20,
+  bubblePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+)
+```
+
+### Convex FAB
+
+A raised center button (FAB-like) with the rest evenly distributed:
+
+```dart
+BottomShellAppearance.convex(
+  height: 56,
+  centerIndex: -1,         // -1 = auto middle
+  convexSize: 54,
+  convexElevation: 20,
+  convexBorderRadius: 27,
+)
+```
+
+### Sliding Indicator
+
+A background highlight slides horizontally behind the selected item:
+
+```dart
+BottomShellAppearance.sliding(
+  height: 64,
+  indicatorHeight: 44,
+  indicatorBorderRadius: 14,
+  indicatorMargin: const EdgeInsets.symmetric(horizontal: 6),
+)
+```
+
+### Glow / Neon
+
+Dark floating pill with a colored glow/neon effect on the selected icon:
+
+```dart
+BottomShellAppearance.glow(
+  height: 64,
+  borderRadius: 40,
+  margin: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+  backgroundColor: const Color(0xFF1E1E2C), // inner bar
+  surfaceColor: const Color(0xFFE9E6F2),    // outer card
+  surfacePadding: const EdgeInsets.all(6),
+  glowRadius: 24,
+  glowSpread: 8,
+  glowOpacity: 0.55,
+)
+```
+
+### Custom Renderer
+
+For full control, implement `BottomBarRenderer` and pass it directly:
+
+```dart
+BottomShellAppearance(
+  renderer: MyCustomRenderer(),
+  labelBehavior: BottomLabelBehavior.onlySelected,
+  animationStyle: const BottomBarAnimationStyle(
+    duration: Duration(milliseconds: 300),
+    curve: Curves.easeInOutCubic,
+  ),
+)
+```
+
+### Animation Timing
+
+All renderers share a common animation style that controls duration and curve:
+
+```dart
+BottomShellAppearance.flashy(
+  animationStyle: const BottomBarAnimationStyle(
+    duration: Duration(milliseconds: 350),
+    curve: Curves.elasticOut,
+  ),
+)
 ```
 
 Labels can be controlled with `BottomLabelBehavior`:
@@ -512,6 +648,10 @@ BottomShell(
 
 ## Example
 
+The example app includes a **live style switcher** — a dropdown at the top of
+every page lets you switch between all 12 built-in bottom bar presets at
+runtime.
+
 Run the core Navigator demo:
 
 ```sh
@@ -531,6 +671,71 @@ Run the `auto_route` demo:
 ```sh
 cd example
 flutter run -t lib/auto_route_example.dart
+```
+
+### What the example demonstrates
+
+| Feature | How to see it |
+|---------|---------------|
+| Persistent tab state | Increment the counter, switch tabs, come back |
+| Nested navigation | Tap any list item — pushes inside the branch |
+| Pop-to-root | Tap the already-selected tab icon |
+| Badges | "Alerts" tab shows a count badge |
+| Scroll-to-hide | Scroll any list down — the bar hides |
+| Body transitions | Fade animation on tab switch |
+| Adaptive layout | Resize (desktop) or rotate (tablet) |
+| Live style switching | Use the "Bar Style" dropdown |
+
+### Minimal quick-start
+
+```dart
+import 'package:bottom_shell_nav/bottom_shell_nav.dart';
+import 'package:flutter/material.dart';
+
+void main() => runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: BottomShell(
+        appearance: BottomShellAppearance.glow(
+          backgroundColor: const Color(0xFF1A1B26),
+        ),
+        branches: [
+          BottomBranch(
+            id: 'home',
+            destination: const BottomDestination(
+              icon: Icons.home_outlined,
+              selectedIcon: Icons.home,
+              label: 'Home',
+            ),
+            builder: (_) => const Center(child: Text('Home')),
+          ),
+          BottomBranch(
+            id: 'search',
+            destination: const BottomDestination(
+              icon: Icons.search,
+              label: 'Search',
+            ),
+            builder: (_) => const Center(child: Text('Search')),
+          ),
+          BottomBranch(
+            id: 'profile',
+            destination: const BottomDestination(
+              icon: Icons.person_outline,
+              selectedIcon: Icons.person,
+              label: 'Profile',
+            ),
+            builder: (_) => const Center(child: Text('Profile')),
+          ),
+        ],
+      ),
+    );
+  }
+}
 ```
 
 ## Roadmap
