@@ -23,7 +23,8 @@ way to work with routers.
 - Selected-tab restoration and branch navigator restoration scopes.
 - Public controller actions for select, reselect, can-pop and pop-to-root.
 - Adaptive NavigationRail, extended rail and desktop drawer layouts.
-- Material, Floating Pill and Cupertino renderers.
+- Material, Floating Pill, Cupertino, Curved, GNav, Dot Indicator,
+  Water Drop, Flashy, Bubble, Convex, Sliding and Glow renderers.
 - Scroll-to-hide, root scroll-to-top and custom scroll registry behavior.
 - Programmatic bottom bar visibility control.
 - Disabled destinations, async tab guards and pending guard UX.
@@ -37,7 +38,7 @@ way to work with routers.
 
 ```yaml
 dependencies:
-  bottom_shell_nav: ^0.2.0
+  bottom_shell_nav: ^0.3.0
 ```
 
 ## Core Usage
@@ -191,6 +192,20 @@ BottomShell(
   branches: branches,
   appearance: const BottomShellAppearance.cupertino(),
 )
+```
+
+Additional presets are available for more opinionated UI styles:
+
+```dart
+BottomShellAppearance.curved()
+BottomShellAppearance.gNav()
+BottomShellAppearance.dotIndicator()
+BottomShellAppearance.waterDrop()
+BottomShellAppearance.flashy()
+BottomShellAppearance.bubble()
+BottomShellAppearance.convex()
+BottomShellAppearance.sliding()
+BottomShellAppearance.glow()
 ```
 
 Labels can be controlled with `BottomLabelBehavior`:

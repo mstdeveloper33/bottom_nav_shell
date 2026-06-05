@@ -5,13 +5,60 @@ void main() {
   runApp(const CoreModeExampleApp());
 }
 
-class CoreModeExampleApp extends StatelessWidget {
+/// All available appearance presets.
+enum BarStyle {
+  material('Material'),
+  floatingPill('Floating Pill'),
+  cupertino('Cupertino'),
+  curved('Curved / Notched'),
+  gNav('GNav Pill'),
+  dotIndicator('Dot Indicator'),
+  waterDrop('Water Drop'),
+  flashy('Flashy'),
+  bubble('Bubble'),
+  convex('Convex FAB'),
+  sliding('Sliding'),
+  glow('Glow / Neon');
+
+  const BarStyle(this.label);
+  final String label;
+
+  BottomShellAppearance toAppearance() {
+    return switch (this) {
+      BarStyle.material => const BottomShellAppearance.material(),
+      BarStyle.floatingPill => BottomShellAppearance.floatingPill(),
+      BarStyle.cupertino => const BottomShellAppearance.cupertino(),
+      BarStyle.curved => BottomShellAppearance.curved(),
+      BarStyle.gNav => BottomShellAppearance.gNav(),
+      BarStyle.dotIndicator => BottomShellAppearance.dotIndicator(),
+      BarStyle.waterDrop => BottomShellAppearance.waterDrop(),
+      BarStyle.flashy => BottomShellAppearance.flashy(),
+      BarStyle.bubble => BottomShellAppearance.bubble(),
+      BarStyle.convex => BottomShellAppearance.convex(),
+      BarStyle.sliding => BottomShellAppearance.sliding(),
+      BarStyle.glow => BottomShellAppearance.glow(
+        backgroundColor: const Color(0xFF1A1B26),
+        surfaceColor: const Color(0xFFE9E6F2),
+        surfacePadding: const EdgeInsets.all(6),
+      ),
+    };
+  }
+}
+
+class CoreModeExampleApp extends StatefulWidget {
   const CoreModeExampleApp({super.key});
+
+  @override
+  State<CoreModeExampleApp> createState() => _CoreModeExampleAppState();
+}
+
+class _CoreModeExampleAppState extends State<CoreModeExampleApp> {
+  BarStyle _currentStyle = BarStyle.floatingPill;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'bottom_shell_nav core demo',
+      title: 'bottom_shell_nav demo',
       restorationScopeId: 'bottom_shell_nav_core_demo',
       theme: ThemeData(
         useMaterial3: true,
@@ -25,8 +72,9 @@ class CoreModeExampleApp extends StatelessWidget {
         ),
       ),
       home: BottomShell(
+        key: ValueKey(_currentStyle),
         restorationScopeId: 'core_shell',
-        appearance: BottomShellAppearance.floatingPill(),
+        appearance: _currentStyle.toAppearance(),
         adaptivePolicy: const AdaptiveNavigationPolicy.automatic(
           extendedRailBreakpoint: 840,
           drawerBreakpoint: 1200,
@@ -45,10 +93,13 @@ class CoreModeExampleApp extends StatelessWidget {
               selectedIcon: Icons.home,
               label: 'Home',
             ),
-            builder: (_) => const DemoBranchPage(
+            builder: (_) => DemoBranchPage(
               title: 'Home',
               subtitle: 'Counter state stays alive when you switch tabs.',
               icon: Icons.home,
+              currentStyle: _currentStyle,
+              onStyleChanged: (style) =>
+                  setState(() => _currentStyle = style),
             ),
           ),
           BottomBranch(
@@ -58,11 +109,14 @@ class CoreModeExampleApp extends StatelessWidget {
               selectedIcon: Icons.checklist,
               label: 'Tasks',
             ),
-            builder: (_) => const DemoBranchPage(
+            builder: (_) => DemoBranchPage(
               title: 'Tasks',
               subtitle: 'Open a detail page and the bottom bar stays visible.',
               icon: Icons.checklist,
               itemCount: 8,
+              currentStyle: _currentStyle,
+              onStyleChanged: (style) =>
+                  setState(() => _currentStyle = style),
             ),
           ),
           BottomBranch(
@@ -73,11 +127,14 @@ class CoreModeExampleApp extends StatelessWidget {
               label: 'Alerts',
               badge: BranchBadge.count(8),
             ),
-            builder: (_) => const DemoBranchPage(
+            builder: (_) => DemoBranchPage(
               title: 'Alerts',
               subtitle: 'Badges support count, dot and 99+ rendering.',
               icon: Icons.notifications,
               itemCount: 5,
+              currentStyle: _currentStyle,
+              onStyleChanged: (style) =>
+                  setState(() => _currentStyle = style),
             ),
           ),
           BottomBranch(
@@ -87,11 +144,14 @@ class CoreModeExampleApp extends StatelessWidget {
               selectedIcon: Icons.person,
               label: 'Profile',
             ),
-            builder: (_) => const DemoBranchPage(
+            builder: (_) => DemoBranchPage(
               title: 'Profile',
               subtitle: 'Tap this selected tab again to pop back to root.',
               icon: Icons.person,
               itemCount: 3,
+              currentStyle: _currentStyle,
+              onStyleChanged: (style) =>
+                  setState(() => _currentStyle = style),
             ),
           ),
         ],
@@ -105,6 +165,8 @@ class DemoBranchPage extends StatefulWidget {
     required this.title,
     required this.subtitle,
     required this.icon,
+    required this.currentStyle,
+    required this.onStyleChanged,
     this.itemCount = 4,
     super.key,
   });
@@ -113,6 +175,8 @@ class DemoBranchPage extends StatefulWidget {
   final String subtitle;
   final IconData icon;
   final int itemCount;
+  final BarStyle currentStyle;
+  final ValueChanged<BarStyle> onStyleChanged;
 
   @override
   State<DemoBranchPage> createState() => _DemoBranchPageState();
@@ -130,6 +194,40 @@ class _DemoBranchPageState extends State<DemoBranchPage> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
         children: [
+          // Style picker
+          Card(
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.palette_outlined, size: 20),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DropdownButtonFormField<BarStyle>(
+                      initialValue: widget.currentStyle,
+                      decoration: const InputDecoration(
+                        labelText: 'Bar Style',
+                        border: InputBorder.none,
+                        isDense: true,
+                      ),
+                      items: [
+                        for (final style in BarStyle.values)
+                          DropdownMenuItem(
+                            value: style,
+                            child: Text(style.label),
+                          ),
+                      ],
+                      onChanged: (style) {
+                        if (style != null) widget.onStyleChanged(style);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
           ListTile(
             contentPadding: EdgeInsets.zero,
             leading: CircleAvatar(

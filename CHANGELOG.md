@@ -1,3 +1,23 @@
+## 0.3.0
+
+### Added
+
+- New built-in bottom bar renderer presets: `curved`, `gNav`,
+  `dotIndicator`, `waterDrop`, `flashy`, `bubble`, `convex`, `sliding`
+  and `glow`.
+- Public renderer classes for all new presets, available from the package
+  barrel export.
+- Glow renderer surface customization through `backgroundColor`,
+  `surfaceColor` and `surfacePadding`.
+- Example app style switcher to preview all built-in bottom bar presets in a
+  single demo app.
+
+### Changed
+
+- Curved renderer visuals were refined with smoother notch motion and a more
+  configurable selected action button.
+- Convex renderer visuals were simplified to a cleaner FAB-centered layout.
+
 ## 0.2.0
 
 ### Added
