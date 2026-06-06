@@ -89,6 +89,7 @@ class _BubbleItem extends StatelessWidget {
         state.theme.selectedItemColor ??
         colorScheme.primary;
     final unselectedColor =
+        destination.unselectedColor ??
         state.theme.unselectedItemColor ?? colorScheme.onSurfaceVariant;
     final isEnabled = state.canSelect(index);
     final isPending = state.isPending(index);
@@ -143,6 +144,9 @@ class _BubbleItem extends StatelessWidget {
       selected: _isSelected,
       child: GestureDetector(
         onTap: isEnabled ? () => state.onSelect(index) : null,
+        onLongPress: isEnabled && state.onLongPress != null
+            ? () => state.onLongPress!(index)
+            : null,
         behavior: HitTestBehavior.opaque,
         child: AnimatedContainer(
           duration: duration,

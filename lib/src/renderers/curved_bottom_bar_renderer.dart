@@ -109,7 +109,8 @@ class CurvedBottomBarRenderer extends BottomBarRenderer {
                             : _UnselectedItem(
                                 index: i,
                                 state: state,
-                                color: unselectedColor,
+                                color: state.destinations[i].unselectedColor ??
+                                    unselectedColor,
                               ),
                       ),
                   ],
@@ -158,8 +159,10 @@ class _SelectedFab extends StatelessWidget {
 
     final itemCount = state.destinations.length;
     final itemWidth = barWidth / itemCount;
-    final leftPos =
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final logicalPos =
         itemWidth * state.selectedIndex + itemWidth / 2 - fabSize / 2;
+    final leftPos = isRtl ? barWidth - logicalPos - fabSize : logicalPos;
 
     final destination = state.destinations[state.selectedIndex];
     final isPending = state.isPending(state.selectedIndex);
@@ -215,6 +218,9 @@ class _SelectedFab extends StatelessWidget {
           child: InkWell(
             customBorder: const CircleBorder(),
             onTap: () => state.onSelect(state.selectedIndex),
+            onLongPress: state.onLongPress != null
+                ? () => state.onLongPress!(state.selectedIndex)
+                : null,
             child: Center(child: iconWidget),
           ),
         ),
@@ -273,6 +279,9 @@ class _UnselectedItem extends StatelessWidget {
       enabled: isEnabled,
       child: GestureDetector(
         onTap: isEnabled ? () => state.onSelect(index) : null,
+        onLongPress: isEnabled && state.onLongPress != null
+            ? () => state.onLongPress!(index)
+            : null,
         behavior: HitTestBehavior.opaque,
         child: SizedBox.expand(
           child: Column(

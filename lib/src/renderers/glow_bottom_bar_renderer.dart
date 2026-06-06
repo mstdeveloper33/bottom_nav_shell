@@ -127,7 +127,9 @@ class _GlowItem extends StatelessWidget {
     final isPending = state.isPending(index);
 
     final itemColor = destination.selectedColor ?? selectedColor;
-    final activeColor = _isSelected ? itemColor : Colors.white60;
+    final unselectedColor = destination.unselectedColor ??
+        state.theme.unselectedItemColor ?? Colors.white60;
+    final activeColor = _isSelected ? itemColor : unselectedColor;
     final effectiveColor =
         isEnabled ? activeColor : activeColor.withValues(alpha: 0.3);
 
@@ -166,6 +168,9 @@ class _GlowItem extends StatelessWidget {
       selected: _isSelected,
       child: GestureDetector(
         onTap: isEnabled ? () => state.onSelect(index) : null,
+        onLongPress: isEnabled && state.onLongPress != null
+            ? () => state.onLongPress!(index)
+            : null,
         behavior: HitTestBehavior.opaque,
         child: SizedBox.expand(
           child: Center(

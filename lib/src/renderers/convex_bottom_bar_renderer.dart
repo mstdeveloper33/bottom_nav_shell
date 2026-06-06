@@ -180,6 +180,9 @@ class _CenterFab extends StatelessWidget {
       selected: _isSelected,
       child: GestureDetector(
         onTap: isEnabled ? () => state.onSelect(index) : null,
+        onLongPress: isEnabled && state.onLongPress != null
+            ? () => state.onLongPress!(index)
+            : null,
         child: AnimatedScale(
           scale: _isSelected ? 1.0 : 0.92,
           duration: duration,
@@ -235,10 +238,10 @@ class _SideItem extends StatelessWidget {
     final isPending = state.isPending(index);
 
     final effectiveColor = !isEnabled
-        ? unselectedColor.withValues(alpha: 0.38)
+        ? (destination.unselectedColor ?? unselectedColor).withValues(alpha: 0.38)
         : _isSelected
-            ? selectedColor
-            : unselectedColor;
+            ? (destination.selectedColor ?? selectedColor)
+            : (destination.unselectedColor ?? unselectedColor);
 
     final icon = isPending
         ? SizedBox(
@@ -283,6 +286,9 @@ class _SideItem extends StatelessWidget {
       selected: _isSelected,
       child: GestureDetector(
         onTap: isEnabled ? () => state.onSelect(index) : null,
+        onLongPress: isEnabled && state.onLongPress != null
+            ? () => state.onLongPress!(index)
+            : null,
         behavior: HitTestBehavior.opaque,
         child: SizedBox.expand(
           child: Column(

@@ -1,3 +1,10 @@
+/// A route-aware, persistent and adaptive bottom navigation shell for Flutter.
+///
+/// Provides persistent tab state, nested navigation, multiple router modes
+/// (core Navigator, go_router, auto_route) and 12+ built-in bottom bar
+/// renderer presets.
+library;
+
 export 'src/appearance/bottom_bar_animation_style.dart';
 export 'src/appearance/bottom_label_behavior.dart';
 export 'src/appearance/bottom_shell_body_transition.dart';

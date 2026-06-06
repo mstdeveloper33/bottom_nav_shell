@@ -18,7 +18,7 @@ class CupertinoBottomBarRenderer extends BottomBarRenderer {
         state.theme.unselectedItemColor ?? colorScheme.onSurfaceVariant;
     final background = state.theme.backgroundColor ?? colorScheme.surface;
 
-    return CupertinoTabBar(
+    final tabBar = CupertinoTabBar(
       currentIndex: state.selectedIndex,
       activeColor: activeColor,
       inactiveColor: inactiveColor,
@@ -49,6 +49,18 @@ class CupertinoBottomBarRenderer extends BottomBarRenderer {
                 : state.destinations[index].label,
           ),
       ],
+    );
+
+    // Wrap with long-press detector if callback is provided
+    if (state.onLongPress == null) {
+      return tabBar;
+    }
+
+    return GestureDetector(
+      onLongPress: () {
+        state.onLongPress!(state.selectedIndex);
+      },
+      child: tabBar,
     );
   }
 }

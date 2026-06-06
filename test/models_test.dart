@@ -152,4 +152,76 @@ void main() {
       expect(redirected, isTrue);
     });
   });
+
+  group('BottomDestination per-destination colors', () {
+    test('unselectedColor is stored and propagated via copyWith', () {
+      const dest = BottomDestination(
+        icon: Icons.home,
+        label: 'Home',
+        selectedColor: Colors.blue,
+        unselectedColor: Colors.grey,
+      );
+
+      expect(dest.selectedColor, Colors.blue);
+      expect(dest.unselectedColor, Colors.grey);
+
+      final copy = dest.copyWith(unselectedColor: Colors.red);
+      expect(copy.unselectedColor, Colors.red);
+      expect(copy.selectedColor, Colors.blue);
+    });
+
+    test('unselectedColor defaults to null', () {
+      const dest = BottomDestination(icon: Icons.home, label: 'Home');
+      expect(dest.unselectedColor, isNull);
+    });
+  });
+
+  group('BranchBadge animated flag', () {
+    test('animated defaults to true', () {
+      const badge = BranchBadge.count(5);
+      expect(badge.animated, isTrue);
+    });
+
+    test('can disable animation', () {
+      const badge = BranchBadge.count(3, animated: false);
+      expect(badge.animated, isFalse);
+    });
+  });
+
+  group('BottomBarState onLongPress', () {
+    test('onLongPress is optional and nullable', () {
+      final state = BottomBarState(
+        destinations: const [
+          BottomDestination(icon: Icons.home, label: 'Home'),
+          BottomDestination(icon: Icons.search, label: 'Search'),
+        ],
+        selectedIndex: 0,
+        onSelect: (_) {},
+        theme: const BottomShellThemeData(),
+        labelBehavior: BottomLabelBehavior.alwaysShow,
+        animationStyle: const BottomBarAnimationStyle.smooth(),
+      );
+
+      expect(state.onLongPress, isNull);
+    });
+
+    test('onLongPress callback is invoked with correct index', () {
+      int? pressedIndex;
+      final state = BottomBarState(
+        destinations: const [
+          BottomDestination(icon: Icons.home, label: 'Home'),
+          BottomDestination(icon: Icons.search, label: 'Search'),
+        ],
+        selectedIndex: 0,
+        onSelect: (_) {},
+        onLongPress: (index) => pressedIndex = index,
+        theme: const BottomShellThemeData(),
+        labelBehavior: BottomLabelBehavior.alwaysShow,
+        animationStyle: const BottomBarAnimationStyle.smooth(),
+      );
+
+      state.onLongPress!(1);
+      expect(pressedIndex, 1);
+    });
+  });
 }

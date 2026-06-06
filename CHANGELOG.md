@@ -1,3 +1,21 @@
+## 0.4.1
+
+### Fixed
+
+- `onLongPress` now works in all 13 built-in renderers (was previously only
+  active in Material and FloatingPill).
+- `destination.unselectedColor` is now respected by all renderers.
+- Glow renderer no longer ignores `theme.unselectedItemColor` (was hardcoded
+  to `Colors.white60`).
+- Curved and Sliding renderers are now RTL-safe (previously used hardcoded
+  left positioning).
+- CupertinoBottomBarRenderer supports long-press via a wrapping
+  GestureDetector.
+- Added library-level documentation comment to the barrel export for better
+  pub.dev scoring.
+- Expanded test coverage for `onLongPress`, `unselectedColor`, badge animated
+  flag and `BottomBarState` constructor.
+
 ## 0.4.0
 
 ### Added
