@@ -2,7 +2,6 @@ bottom_shell_nav_plan.md
 flutter_nav_kit_prompts.md
 build/
 coverage/
-screenshots/
 test/goldens/
 .dart_tool/
 .idea/
