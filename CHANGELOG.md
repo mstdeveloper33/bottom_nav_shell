@@ -1,8 +1,15 @@
+## 0.4.3
+
+### Fixed
+
+- Screenshots are now correctly included in the pub archive (removed `screenshots/` from `.pubignore`).
+
 ## 0.4.2
 
 ### Docs
 
-- Added screenshots gallery to README.
+- Added neumorphic bottom bar renderer.
+- Added screenshots gallery to README and pubspec.yaml for pub.dev.
 
 ## 0.4.1
 
