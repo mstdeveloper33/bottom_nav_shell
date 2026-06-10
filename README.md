@@ -23,6 +23,10 @@ A few renderer and selection states from the example app:
 | --- | --- | --- |
 | ![Profile pill](screenshots/readme/Ekran%20Resmi%202026-06-10%2011.26.39.png) | ![Tasks pill](screenshots/readme/Ekran%20Resmi%202026-06-10%2011.26.45.png) | ![Dark glow](screenshots/readme/Ekran%20Resmi%202026-06-10%2011.26.53.png) |
 
+| Neumorphic |
+| --- |
+| ![Neumorphic](screenshots/readme/Ekran%20Resmi%202026-06-10%2013.56.34.png) |
+
 ## Why this package?
 
 Most bottom bar packages only draw the bar. Real apps also need tab state,
@@ -40,7 +44,7 @@ way to work with routers.
 - Public controller actions for select, reselect, can-pop and pop-to-root.
 - Adaptive NavigationRail, extended rail and desktop drawer layouts.
 - Material, Floating Pill, Cupertino, Curved, GNav, Dot Indicator,
-  Water Drop, Flashy, Bubble, Convex, Sliding and Glow renderers.
+  Water Drop, Flashy, Bubble, Convex, Sliding, Glow and Neumorphic renderers.
 - Scroll-to-hide, root scroll-to-top and custom scroll registry behavior.
 - Programmatic bottom bar visibility control.
 - Disabled destinations, async tab guards and pending guard UX.

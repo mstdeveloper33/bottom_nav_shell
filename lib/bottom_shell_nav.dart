@@ -34,6 +34,7 @@ export 'src/renderers/floating_pill_bottom_bar_renderer.dart';
 export 'src/renderers/glow_bottom_bar_renderer.dart';
 export 'src/renderers/gnav_bottom_bar_renderer.dart';
 export 'src/renderers/material_bottom_bar_renderer.dart';
+export 'src/renderers/neumorphic_bottom_bar_renderer.dart';
 export 'src/renderers/sliding_bottom_bar_renderer.dart';
 export 'src/renderers/water_drop_bottom_bar_renderer.dart';
 export 'src/routes/bottom_shell_route_event.dart';

@@ -18,7 +18,8 @@ enum BarStyle {
   bubble('Bubble'),
   convex('Convex FAB'),
   sliding('Sliding'),
-  glow('Glow / Neon');
+  glow('Glow / Neon'),
+  neumorphic('Neumorphic');
 
   const BarStyle(this.label);
   final String label;
@@ -41,6 +42,7 @@ enum BarStyle {
         surfaceColor: const Color(0xFFE9E6F2),
         surfacePadding: const EdgeInsets.all(6),
       ),
+      BarStyle.neumorphic => BottomShellAppearance.neumorphic(),
     };
   }
 }
@@ -137,6 +139,24 @@ class _CoreModeExampleAppState extends State<CoreModeExampleApp> {
                   setState(() => _currentStyle = style),
             ),
           ),
+          BottomBranch(
+            id: 'search',
+            destination: const BottomDestination(
+              icon: Icons.search_outlined,
+              selectedIcon: Icons.search,
+              label: 'Search',
+            ),
+            builder: (_) => DemoBranchPage(
+              title: 'Search',
+              subtitle: 'Search across all your items.',
+              icon: Icons.search,
+              itemCount: 6,
+              currentStyle: _currentStyle,
+              onStyleChanged: (style) =>
+                  setState(() => _currentStyle = style),
+            ),
+          ),
+
           BottomBranch(
             id: 'profile',
             destination: const BottomDestination(

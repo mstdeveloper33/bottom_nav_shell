@@ -11,6 +11,28 @@ topics:
   - go-router
   - material3
 
+screenshots:
+  - description: "Floating Pill style bottom navigation"
+    path: screenshots/readme/Ekran Resmi 2026-06-10 11.25.36.png
+  - description: "Material style bottom navigation"
+    path: screenshots/readme/Ekran Resmi 2026-06-10 11.25.52.png
+  - description: "Center highlight style"
+    path: screenshots/readme/Ekran Resmi 2026-06-10 11.26.01.png
+  - description: "Alert emphasis with badge"
+    path: screenshots/readme/Ekran Resmi 2026-06-10 11.26.14.png
+  - description: "Minimal accent style"
+    path: screenshots/readme/Ekran Resmi 2026-06-10 11.26.21.png
+  - description: "Bubble selection style"
+    path: screenshots/readme/Ekran Resmi 2026-06-10 11.26.31.png
+  - description: "Profile pill style"
+    path: screenshots/readme/Ekran Resmi 2026-06-10 11.26.39.png
+  - description: "Tasks pill style"
+    path: screenshots/readme/Ekran Resmi 2026-06-10 11.26.45.png
+  - description: "Dark glow neon style"
+    path: screenshots/readme/Ekran Resmi 2026-06-10 11.26.53.png
+  - description: "Neumorphic soft UI style"
+    path: screenshots/readme/Ekran Resmi 2026-06-10 13.56.34.png
+
 environment:
   sdk: ^3.10.4
   flutter: ">=3.22.0"

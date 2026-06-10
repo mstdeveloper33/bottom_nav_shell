@@ -11,6 +11,7 @@ import '../renderers/floating_pill_bottom_bar_renderer.dart';
 import '../renderers/glow_bottom_bar_renderer.dart';
 import '../renderers/gnav_bottom_bar_renderer.dart';
 import '../renderers/material_bottom_bar_renderer.dart';
+import '../renderers/neumorphic_bottom_bar_renderer.dart';
 import '../renderers/sliding_bottom_bar_renderer.dart';
 import '../renderers/water_drop_bottom_bar_renderer.dart';
 import 'bottom_bar_animation_style.dart';
@@ -233,6 +234,47 @@ class BottomShellAppearance {
         indicatorHeight: indicatorHeight,
         indicatorBorderRadius: indicatorBorderRadius,
         indicatorMargin: indicatorMargin,
+      ),
+      labelBehavior: labelBehavior,
+      animationStyle: animationStyle,
+    );
+  }
+
+  /// Neumorphic (Soft UI) appearance — detached leading/trailing items with
+  /// a grouped center container, concave/convex shadows and press effect.
+  factory BottomShellAppearance.neumorphic({
+    BottomLabelBehavior labelBehavior = BottomLabelBehavior.alwaysHide,
+    BottomBarAnimationStyle animationStyle =
+        const BottomBarAnimationStyle.smooth(),
+    double height = 80,
+    int detachedLeading = 1,
+    int detachedTrailing = 1,
+    double itemDiameter = 56,
+    double groupBorderRadius = 36,
+    double gap = 12,
+    double shadowIntensity = 0.25,
+    double depth = 6,
+    double pressScale = 0.92,
+    bool animateSelection = true,
+    NeumorphicLightSource lightSource = NeumorphicLightSource.topLeft,
+    EdgeInsets margin = const EdgeInsets.fromLTRB(16, 0, 16, 12),
+    EdgeInsets groupPadding = const EdgeInsets.symmetric(horizontal: 8),
+  }) {
+    return BottomShellAppearance(
+      renderer: NeumorphicBottomBarRenderer(
+        height: height,
+        detachedLeading: detachedLeading,
+        detachedTrailing: detachedTrailing,
+        itemDiameter: itemDiameter,
+        groupBorderRadius: groupBorderRadius,
+        gap: gap,
+        shadowIntensity: shadowIntensity,
+        depth: depth,
+        pressScale: pressScale,
+        animateSelection: animateSelection,
+        lightSource: lightSource,
+        margin: margin,
+        groupPadding: groupPadding,
       ),
       labelBehavior: labelBehavior,
       animationStyle: animationStyle,
