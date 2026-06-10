@@ -7,6 +7,22 @@ tab state is preserved, each branch can own its own navigation stack, detail
 routes keep the bottom bar visible, and the same renderer API works in core
 Navigator mode, `go_router` mode or `auto_route` mode.
 
+## Screenshots
+
+A few renderer and selection states from the example app:
+
+| Pill selection | Material labels | Center highlight |
+| --- | --- | --- |
+| ![Pill selection](screenshots/readme/Ekran%20Resmi%202026-06-10%2011.25.36.png) | ![Material labels](screenshots/readme/Ekran%20Resmi%202026-06-10%2011.25.52.png) | ![Center highlight](screenshots/readme/Ekran%20Resmi%202026-06-10%2011.26.01.png) |
+
+| Alert emphasis | Minimal accent | Bubble selection |
+| --- | --- | --- |
+| ![Alert emphasis](screenshots/readme/Ekran%20Resmi%202026-06-10%2011.26.14.png) | ![Minimal accent](screenshots/readme/Ekran%20Resmi%202026-06-10%2011.26.21.png) | ![Bubble selection](screenshots/readme/Ekran%20Resmi%202026-06-10%2011.26.31.png) |
+
+| Profile pill | Tasks pill | Dark glow |
+| --- | --- | --- |
+| ![Profile pill](screenshots/readme/Ekran%20Resmi%202026-06-10%2011.26.39.png) | ![Tasks pill](screenshots/readme/Ekran%20Resmi%202026-06-10%2011.26.45.png) | ![Dark glow](screenshots/readme/Ekran%20Resmi%202026-06-10%2011.26.53.png) |
+
 ## Why this package?
 
 Most bottom bar packages only draw the bar. Real apps also need tab state,
